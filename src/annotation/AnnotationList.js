@@ -8,7 +8,7 @@ import ScrollTopHook from './render/ScrollTopHook';
 import timeformat from '../utils/timeformat';
 
 class AnnotationList {
-  constructor(playlist, annotations) {
+  constructor(playlist, annotations, controls) {
     this.playlist = playlist;
     this.annotations = annotations.map((a, i) => {
       // TODO support different formats later on.
@@ -24,6 +24,8 @@ class AnnotationList {
 
       return note;
     });
+
+    this.controls = controls;
     this.setupEE(playlist.ee);
 
     // TODO actually make a real plugin system that's not terrible.
@@ -136,6 +138,19 @@ class AnnotationList {
     return h('div.resize-handle.resize-e', config);
   }
 
+  renderControls(note, i) {
+    // seems to be a bug with references, or I'm missing something.
+    const that = this;
+    return this.controls.map((ctrl) => {
+      return h(`i.${ctrl.class}`, {
+        onclick: () => {
+          ctrl.action(note, i, that.annotations);
+          that.playlist.drawRequest();
+        }
+      });
+    });
+  }
+
   render() {
     const boxes = h('div.annotations-boxes',
       {
@@ -195,7 +210,7 @@ class AnnotationList {
       {
         hook: new ScrollTopHook(),
       },
-      this.annotations.map((note) => {
+      this.annotations.map((note, i) => {
         const format = timeformat(this.playlist.durationFormat);
         const start = format(note.start);
         const end = format(note.end);
@@ -222,6 +237,9 @@ class AnnotationList {
             h('span.annotation.text', [
               note.lines,
             ]),
+            h('span.annotation.actions',
+              this.renderControls(note, i)
+            ),
           ],
         );
       }),

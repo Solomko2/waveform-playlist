@@ -136,7 +136,14 @@ export default class {
   }
 
   setAnnotations(annotations) {
-    this.annotationList = new AnnotationList(this, annotations);
+    this.annotationList = new AnnotationList(this, annotations,
+      [
+      {class: 'fa.fa-trash',
+      action: (annotation, i, annotations) => {
+        annotations.splice(i, 1);
+      }}
+      ]
+    );
   }
 
   setEventEmitter(ee) {
